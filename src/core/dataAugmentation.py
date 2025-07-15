@@ -99,9 +99,16 @@ def augment(image):
     image = Image.fromarray(image.astype('uint8')).convert('L')
     return image
 
-if __name__ == '__main__':
-    input_path = './data/images/'
-    output_path = './augmented_data/images/'
+def main(input_path='./data/images/', output_path='./augmented_data/images/'):
+    """主函数：执行数据增强
+    
+    Args:
+        input_path: 输入图片目录路径
+        output_path: 输出图片目录路径
+    """
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+    
     image_names = os.listdir(input_path)
     count = 0
     for image_name in image_names:
@@ -114,6 +121,11 @@ if __name__ == '__main__':
         image.save(image_output)
 
         count += 1
-        if count%1000 == 0:
+        if count % 1000 == 0:
             print('Images Augmented {}'.format(count))
+    
+    print('Data augmentation completed. Total: {} images'.format(count))
+
+if __name__ == '__main__':
+    main()
 

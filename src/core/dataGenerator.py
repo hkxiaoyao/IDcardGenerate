@@ -1,5 +1,5 @@
 # coding:utf-8
-# import sys
+import sys
 # reload(sys)
 # sys.setdefaultencoding('utf8')
 
@@ -8,9 +8,9 @@ import PIL.Image as PImage
 from PIL import ImageFont, ImageDraw
 import numpy as np
 import random
-from dictionary import alphabet, nations
-from address_set import province_set, city_set, couty_set
-from dataAugmentation import augment
+from ..data.dictionary import alphabet, nations
+from ..data.address_set import province_set, city_set, couty_set
+from .dataAugmentation import augment
 
 from tkinter import *
 from tkinter.ttk import *
@@ -48,12 +48,24 @@ def IDcard_generator(amount):
     others = []
 
     numbers = '0123456789'
+    
+    # 常见姓氏
+    common_surnames = ['王', '李', '张', '刘', '陈', '杨', '赵', '黄', '周', '吴', 
+                       '徐', '孙', '胡', '朱', '高', '林', '何', '郭', '马', '罗',
+                       '梁', '宋', '郑', '谢', '韩', '唐', '冯', '于', '董', '萧']
+    
+    # 常见名字字符
+    common_name_chars = ['明', '华', '建', '文', '军', '国', '强', '民', '伟', '峰',
+                         '磊', '涛', '超', '辉', '宇', '杰', '浩', '志', '勇', '鹏',
+                         '娟', '英', '玲', '芳', '燕', '雯', '萍', '红', '慧', '静',
+                         '美', '丽', '秀', '敏', '艳', '莉', '梅', '琳', '君', '欣']
 
     for i in range(amount):
-
-        name_length = random.randint(2, 4)
-        result = random.sample(alphabet, name_length)
-        name_all.append(''.join(result))
+        # 改进姓名生成：姓氏+1-2个名字字符
+        surname = random.choice(common_surnames)
+        name_length = random.randint(1, 2)
+        given_name = ''.join(random.sample(common_name_chars, name_length))
+        name_all.append(surname + given_name)
 
         result = random.sample(u'男女', 1)
         sex_all.append(''.join(result))
@@ -61,14 +73,23 @@ def IDcard_generator(amount):
         result = random.sample(nations, 1)
         nation_all.append(''.join(result))
 
-        result = random.sample(numbers, 4)
-        year_all.append(''.join(result))
+        # 修复年份生成：1950-2010年合理范围
+        year = random.randint(1950, 2010)
+        year_all.append(str(year))
 
-        result = random.sample(numbers, 2)
-        mon_all.append(''.join(result))
+        # 修复月份生成：01-12月
+        month = random.randint(1, 12)
+        mon_all.append(f"{month:02d}")
 
-        result = random.sample(numbers, 2)
-        day_all.append(''.join(result))
+        # 修复日期生成：考虑月份天数
+        if month in [1, 3, 5, 7, 8, 10, 12]:
+            max_day = 31
+        elif month in [4, 6, 9, 11]:
+            max_day = 30
+        else:  # 2月
+            max_day = 28
+        day = random.randint(1, max_day)
+        day_all.append(f"{day:02d}")
 
         id = []
         addr = []
@@ -91,17 +112,17 @@ def IDcard_generator(amount):
             if len(id) == 2:
                 id += random.sample(numbers, 4)
         addr = ''.join(addr)
-        if len(addr) < 11:
-            result = random.sample(alphabet, 11-len(addr))
-            addr += ''.join(result)
-        elif len(addr) > 11:
-            addr = addr[:12]
-        id += year_all[i]
-        id += mon_all[i]
-        id += day_all[i]
+        # 优化地址：移除随机字符填充，保持真实地址
+        if len(addr) > 20:  # 如果地址太长，适当截取
+            addr = addr[:20]
+        
+        # 修复身份证号生成：使用新的年月日
+        id += str(year)
+        id += f"{month:02d}"
+        id += f"{day:02d}"
         id += random.sample(numbers, 3)
         id += random.sample(u'0123456789X', 1)
-        addr_all.append(''.join(addr))
+        addr_all.append(addr)
         id_all.append(''.join(id))
 
     return name_all, sex_all, nation_all, year_all, mon_all, day_all, addr_all, id_all
@@ -253,10 +274,15 @@ def IDcard_save(images, batch_name=None):
             f.write(line)
 
 
-if __name__ == '__main__':
+def main(sample_sum=10, fragment_IDcard=False):
+    """主函数：生成身份证数据
+    
+    Args:
+        sample_sum: 生成样本数量，默认为10
+        fragment_IDcard: 是否生成切片图片，默认为False
+    """
     global ename, esex, enation, eyear, emon, eday, eaddr, eidn
-    fragment_IDcard = True
-    sample_sum = 1000
+    
     print('--- Randomly Generate Content ---')
     ename, esex, enation, eyear, emon, eday, eaddr, eidn = IDcard_generator(sample_sum)
     print('--- Generate ID Card ---')
@@ -267,4 +293,7 @@ if __name__ == '__main__':
     else:
         print('--- ID card ---')
         IDcard_save(images, batch_name='0_')
-    print('--- Generate Database Successfully'.format(sample_sum))
+    print('--- Generate Database Successfully ---')
+
+if __name__ == '__main__':
+    main(sample_sum=10, fragment_IDcard=False)

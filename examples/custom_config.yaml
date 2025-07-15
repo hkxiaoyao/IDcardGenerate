@@ -1,0 +1,66 @@
+# 自定义配置示例
+# 基于 config/default.yaml，展示如何自定义配置参数
+
+# 数据集配置 - 小规模测试
+dataset:
+  output_dir: "output/test_data"
+  augmented_dir: "output/test_augmented"
+  lmdb_dir: "output/test_lmdb"
+  
+  # 测试用小数据集
+  total_samples: 100
+  batch_size: 50
+  train_ratio: 0.7
+  val_ratio: 0.3
+
+# 身份证配置 - 更小的年份范围
+id_card:
+  year_range:
+    min: 1980
+    max: 2000
+  
+  card_size:
+    width: 526   # 缩小一半用于测试
+    height: 340
+  
+  # 字体配置保持不变
+  fonts:
+    name_font: "hei.ttf"
+    id_font: "ocrb10bt.ttf"
+    address_font: "fzhei.ttf"
+  
+  # 调整字体大小适应缩小的卡片
+  font_sizes:
+    name: 21
+    id: 19
+    address: 16
+    nation: 16
+    birth: 16
+    gender: 16
+
+# 数据增强配置 - 更保守的参数
+augmentation:
+  enabled: true
+  params:
+    rotation_range: [-1, 1]      # 更小的旋转范围
+    noise_level: [0.05, 0.15]    # 更低的噪声
+    blur_kernel: [1, 2]          # 更小的模糊核
+    brightness: [0.9, 1.1]       # 更小的亮度变化
+    contrast: [0.9, 1.1]         # 更小的对比度变化
+
+# 资源路径配置
+resources:
+  fonts_dir: "resources/fonts_and_images"
+  images_dir: "resources/fonts_and_images"
+  mapdata_dir: "resources/mapdata"
+  
+  background_images:
+    fore: "fore.png"
+    back: "back.png"
+    complete: "complete.png"
+
+# 日志配置 - 更详细的调试信息
+logging:
+  level: "DEBUG"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
+  file: "output/logs/test_run.log" 

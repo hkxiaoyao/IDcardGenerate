@@ -1,0 +1,70 @@
+# 身份证数据生成配置
+dataset:
+  # 输出目录配置
+  output_dir: "output/data"
+  augmented_dir: "output/augmented_data"
+  lmdb_dir: "output/lmdb"
+  
+  # 数据集分割配置
+  train_ratio: 0.8
+  val_ratio: 0.2
+  
+  # 生成数据配置
+  total_samples: 10000
+  batch_size: 1000
+
+# 身份证生成配置
+id_card:
+  # 年份范围
+  year_range:
+    min: 1950
+    max: 2010
+  
+  # 身份证尺寸
+  card_size:
+    width: 1052
+    height: 680
+  
+  # 字体配置
+  fonts:
+    name_font: "hei.ttf"
+    id_font: "ocrb10bt.ttf"
+    address_font: "fzhei.ttf"
+  
+  # 字体大小配置
+  font_sizes:
+    name: 42
+    id: 38
+    address: 32
+    nation: 32
+    birth: 32
+    gender: 32
+
+# 数据增强配置
+augmentation:
+  enabled: true
+  # 增强参数
+  params:
+    rotation_range: [-2, 2]  # 旋转角度范围
+    noise_level: [0.1, 0.3]  # 噪声级别
+    blur_kernel: [1, 3]      # 模糊核大小
+    brightness: [0.8, 1.2]   # 亮度范围
+    contrast: [0.8, 1.2]     # 对比度范围
+
+# 资源路径配置
+resources:
+  fonts_dir: "resources/fonts_and_images"
+  images_dir: "resources/fonts_and_images"
+  mapdata_dir: "resources/mapdata"
+  
+  # 背景图片
+  background_images:
+    fore: "fore.png"
+    back: "back.png"
+    complete: "complete.png"
+
+# 日志配置
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "output/logs/id_card_generator.log" 

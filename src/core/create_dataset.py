@@ -6,7 +6,7 @@ import os
 import lmdb  # install lmdb by "pip install lmdb"
 import cv2
 import numpy as np
-# from keys import alphabet
+from ..data.dictionary import alphabet
 
 
 # 检查图片是否有效
@@ -94,12 +94,20 @@ def readDataset(datasetPath):
 
 def outputLmdb(inputPath, outputPath, dataPath):
     imgLabelList = []
-    with open(inputPath, 'r') as f:
-        for line in f:
-            imgLabel = line.split(" ")
-            imagePath = dataPath + imgLabel[0]
-            label = imgLabel[1]
-            imgLabelList.append((imagePath, label))
+    try:
+        with open(inputPath, 'r', encoding='utf-8') as f:
+            for line in f:
+                imgLabel = line.split(" ")
+                imagePath = dataPath + imgLabel[0]
+                label = imgLabel[1]
+                imgLabelList.append((imagePath, label))
+    except UnicodeDecodeError:
+        with open(inputPath, 'r', encoding='gbk') as f:
+            for line in f:
+                imgLabel = line.split(" ")
+                imagePath = dataPath + imgLabel[0]
+                label = imgLabel[1]
+                imgLabelList.append((imagePath, label))
 
     ##sort by labelList
     imgLabelListSort = sorted(imgLabelList, key=lambda x: len(x[1]))
@@ -109,9 +117,8 @@ def outputLmdb(inputPath, outputPath, dataPath):
     createDataset(outputPath, imgLabelListSort, checkValid=True)
 
 
-# import glob
-if __name__ == '__main__':
-
+def main():
+    """主函数：创建LMDB数据集"""
     # lmdb 输出目录
     train_outputPath = './lmdb/mini_train'
     val_outputPath = './lmdb/mini_val'
@@ -119,13 +126,25 @@ if __name__ == '__main__':
     val_inputPath = './data/annotations/mini_val.txt'
     dataPath = './data/images/'
 
-    # f = open('./char_std_5990.txt', 'r')
-    # characters = f.readlines()
-    # f.close()
-    # characters_list = [character.strip() for character in characters]
+    # 确保输出目录存在
+    os.makedirs(os.path.dirname(train_outputPath), exist_ok=True)
+    os.makedirs(os.path.dirname(val_outputPath), exist_ok=True)
 
+    # 检查输入文件是否存在
+    if not os.path.exists(train_inputPath):
+        print(f"警告: 训练集标注文件不存在: {train_inputPath}")
+        return
+    
+    if not os.path.exists(val_inputPath):
+        print(f"警告: 验证集标注文件不存在: {val_inputPath}")
+        return
+
+    print("开始创建LMDB数据集...")
     outputLmdb(train_inputPath, train_outputPath, dataPath)
     outputLmdb(val_inputPath, val_outputPath, dataPath)
-    # readDataset(train_outputPath)
+    print("LMDB数据集创建完成")
+
+if __name__ == '__main__':
+    main()
 
 
